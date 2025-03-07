@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core import db, User
 from api.auth import utils as auth_utils
 
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
+
 
 async def get_current_user(
         token: str = Depends(oauth2_scheme),

@@ -19,6 +19,7 @@ from api.auth.schemas import (
 
 from api.auth import utils as auth_utils
 from api.auth import dependencies as auth_dependencies
+from core.models import RoleEnum
 
 router = APIRouter(
     prefix="/auth",
@@ -29,8 +30,15 @@ router = APIRouter(
 @router.post("/register/", response_model=UserSchema)
 async def auth_register(
         new_data: Annotated[Form, Depends(UserRegisterSchema)],
-        session: AsyncSession = Depends(db.generate_session)
+        session: Annotated[AsyncSession,  Depends(db.generate_session)],
+        user: Annotated[User, Depends(auth_dependencies.get_current_active_user)],
 ):
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+
+    if not user.role == RoleEnum.admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
     stmt = select(User).where(User.email == new_data.email)
     result = await session.execute(stmt)
     user = result.scalar_one_or_none()
@@ -39,6 +47,10 @@ async def auth_register(
             status_code=status.HTTP_409_CONFLICT,
             detail="Email already registered",
         )
+
+    if not auth_utils.is_valid_password(new_data.password):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password is incorrect")
+
     new_user = User(
         email=new_data.email,
         role=new_data.role,

@@ -1,8 +1,8 @@
-"""Initial migration
+"""Create all tables
 
-Revision ID: 40f2dcec4a26
+Revision ID: cf2cc04b398c
 Revises: 
-Create Date: 2025-03-03 17:01:58.087151
+Create Date: 2025-03-07 21:08:08.125980
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '40f2dcec4a26'
+revision: str = 'cf2cc04b398c'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -33,6 +33,7 @@ def upgrade() -> None:
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('password_hash', sa.String(), nullable=False),
     sa.Column('role', sa.Enum('admin', 'doctor', 'nurse', 'patient', name='roleenum'), nullable=False),
+    sa.Column('active', sa.Boolean(), server_default='true', nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
@@ -50,7 +51,7 @@ def upgrade() -> None:
     op.create_table('medical_records',
     sa.Column('patient_id', sa.Integer(), nullable=False),
     sa.Column('doctor_id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('diagnosis', sa.Text(), nullable=False),
     sa.Column('treatment', sa.Text(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),

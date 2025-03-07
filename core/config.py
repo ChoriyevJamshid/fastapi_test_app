@@ -1,24 +1,29 @@
-import os
 from pathlib import Path
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from dotenv import load_dotenv
 
 
+BASE_DIR: Path = Path(__file__).resolve().parent.parent
+
+class DbConfig(BaseModel):
+    url: str
+    echo: bool = False
 
 class Settings(BaseSettings):
-    base_dir: Path = Path(__file__).resolve().parent.parent
-    secret_key: str = "Jamshid"
+    secret_key: str | None = None
     debug: bool = False
 
-    db_url: str = f"sqlite+aiosqlite:///{base_dir}/db.sqlite3"
-    db_echo: bool = False
+    db: DbConfig
 
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 30
 
-    # model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_nested_delimiter="_",
+        case_sensitive=False
+    )
 
 
 settings = Settings()
