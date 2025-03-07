@@ -25,6 +25,6 @@ services:
         - 8001:8001
       depends_on:
         - postgres
-        -
+
 volumes:
     postgres_data:
