@@ -36,10 +36,10 @@ SECRET_KEY=
 DB_NAME=
 DB_USER=
 DB_PASSWORD=
-DB_HOST=postgres
+DB_HOST=db
 DB_PORT=
 
-DB_URL=postgresql+asyncpg://username:password@postgres:port/db_name
+DB_URL=postgresql+asyncpg://username:password@db:port/db_name
 ```
 
 ---
