@@ -28,7 +28,7 @@ async def get_patient(
 
     patient = await session.get(Patient, patient_id)
     if not patient:
-        raise HTTPException(status_code=404, detail="Patient not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
     return patient
 
 

@@ -16,6 +16,7 @@ class DBConnector:
             autoflush=False,
         )
 
+
     async def generate_session(self):
         async with self.session_factory() as session:
             yield session

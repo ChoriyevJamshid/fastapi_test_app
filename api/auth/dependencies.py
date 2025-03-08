@@ -1,3 +1,5 @@
+from typing import Annotated
+
 import jwt
 from fastapi import Depends, HTTPException, status, Form
 from fastapi.security import OAuth2PasswordBearer
@@ -12,8 +14,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
 
 async def get_current_user(
+        session: Annotated[AsyncSession, Depends(db.generate_session)],
         token: str = Depends(oauth2_scheme),
-        session: AsyncSession = Depends(db.generate_session)
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -27,7 +29,7 @@ async def get_current_user(
         raise credentials_exception
 
     user_id = payload.get("sub", 0)
-    user = await session.get(User, user_id)
+    user = await session.get(User, int(user_id))
 
     if not user:
         raise credentials_exception
@@ -35,7 +37,7 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-        user: User = Depends(get_current_user)
+        user: Annotated[User, Depends(get_current_user)]
 ):
     if not user.active:
         raise HTTPException(

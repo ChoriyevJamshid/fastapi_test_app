@@ -18,7 +18,7 @@ class TokenInfo(BaseModel):
     token_type: str = "Bearer"
 
 
-router = APIRouter(prefix="", tags=["jwt"])
+router = APIRouter(prefix="jwt", tags=["jwt"])
 
 # http_bearer = HTTPBearer()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")

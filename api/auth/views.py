@@ -76,7 +76,7 @@ async def auth_logout():
 
 
 @router.get("/me/")
-async def auth_me(user: User = Depends(auth_dependencies.get_current_active_user)):
+async def auth_me(user: Annotated[User, Depends(auth_dependencies.get_current_active_user)]):
     return {
         "email": user.email,
         "role": user.role,

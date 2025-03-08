@@ -9,11 +9,16 @@ class DbConfig(BaseModel):
     url: str
     echo: bool = False
 
+class AdminConfig(BaseModel):
+    email: str = "admin@admin.com"
+    password: str = "admin"
+
 class Settings(BaseSettings):
     secret_key: str | None = None
     debug: bool = False
 
     db: DbConfig
+    admin: AdminConfig = AdminConfig()
 
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60

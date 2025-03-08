@@ -1,13 +1,20 @@
+from contextlib import asynccontextmanager
+
 import uvicorn
 from fastapi import FastAPI, Depends
 from fastapi.security import HTTPBearer
 from api import router as api_router
+from core import create_superuser, Base
 
+@asynccontextmanager
+async def lifespan(main_app: FastAPI):
 
-http_bearer = None
-# http_bearer = HTTPBearer(auto_error=False)
+    await create_superuser()
+    yield
 
-app = FastAPI()
+app = FastAPI(
+    lifespan=lifespan,
+)
 app.include_router(api_router)
 
 

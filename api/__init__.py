@@ -15,8 +15,7 @@ from .medical_records import views as medical_records_views
 
 from fastapi import APIRouter
 
-router = APIRouter(prefix="/api/v1", tags=["Api V1"])
-router.include_router(auth_views.router, tags=["auth"])
+router = APIRouter(prefix="/api/v1")
 router.include_router(auth_views.router)
 router.include_router(users_views.router)
 router.include_router(patients_views.router)
