@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.annotation import Annotated
 
 from app import app
-from core.db_connector import db
+from src.db import connector
 
 client = TestClient(app)
 

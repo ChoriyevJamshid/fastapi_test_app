@@ -1,8 +1,8 @@
-"""Create all tables
+"""create all tables
 
-Revision ID: cf2cc04b398c
+Revision ID: a1e5c7fec04d
 Revises: 
-Create Date: 2025-03-07 21:08:08.125980
+Create Date: 2025-03-16 17:42:03.600819
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'cf2cc04b398c'
+revision: str = 'a1e5c7fec04d'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,7 +27,7 @@ def upgrade() -> None:
     sa.Column('contact_info', sa.String(), nullable=False),
     sa.Column('status', sa.Enum('registered', 'hospitalized', 'discharged', name='statusenum'), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_patients'))
     )
     op.create_table('users',
     sa.Column('email', sa.String(), nullable=False),
@@ -35,8 +35,8 @@ def upgrade() -> None:
     sa.Column('role', sa.Enum('admin', 'doctor', 'nurse', 'patient', name='roleenum'), nullable=False),
     sa.Column('active', sa.Boolean(), server_default='true', nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email')
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_users')),
+    sa.UniqueConstraint('email', name=op.f('uq_users_email'))
     )
     op.create_table('hospitalization',
     sa.Column('patient_id', sa.Integer(), nullable=False),
@@ -44,20 +44,22 @@ def upgrade() -> None:
     sa.Column('admission_date', sa.Date(), nullable=False),
     sa.Column('discharge_date', sa.Date(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['doctor_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.ForeignKeyConstraint(['doctor_id'], ['users.id'], name=op.f('fk_hospitalization_doctor_id_users')),
+    sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], name=op.f('fk_hospitalization_patient_id_patients')),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_hospitalization')),
+    sa.UniqueConstraint('patient_id', name=op.f('uq_hospitalization_patient_id'))
     )
     op.create_table('medical_records',
     sa.Column('patient_id', sa.Integer(), nullable=False),
     sa.Column('doctor_id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.Column('diagnosis', sa.Text(), nullable=False),
     sa.Column('treatment', sa.Text(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['doctor_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.ForeignKeyConstraint(['doctor_id'], ['users.id'], name=op.f('fk_medical_records_doctor_id_users')),
+    sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], name=op.f('fk_medical_records_patient_id_patients')),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_medical_records')),
+    sa.UniqueConstraint('patient_id', name=op.f('uq_medical_records_patient_id'))
     )
     # ### end Alembic commands ###
 

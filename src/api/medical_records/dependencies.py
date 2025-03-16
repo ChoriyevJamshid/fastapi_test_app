@@ -6,14 +6,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api.auth.dependencies import get_admin_user
-from src.db import db
+from src.db import connector
 from src.models import MedicalRecords, User
 from src.schemas.medical_records import CreateMedicalRecord, UpdateMedicalRecord
 
 
 async def get_medical_record(
         patient_id: int,
-        session: Annotated[AsyncSession, Depends(db.generate_session)]
+        session: Annotated[AsyncSession, Depends(connector.generate_session)]
 ) -> MedicalRecords:
     stmt = (
         select(
@@ -34,7 +34,7 @@ async def get_medical_record(
 async def create_medical_record(
         patient_id: int,
         new_medical_record_data: Annotated[Form, Depends(CreateMedicalRecord)],
-        session: Annotated[AsyncSession, Depends(db.generate_session)]
+        session: Annotated[AsyncSession, Depends(connector.generate_session)]
 ) -> MedicalRecords:
     new_medical_record = MedicalRecords(
         **new_medical_record_data.model_dump(),
@@ -55,7 +55,7 @@ async def create_medical_record(
 async def update_medical_record(
         medical_record: Annotated[MedicalRecords, Depends(get_medical_record)],
         update_medical_record_data: Annotated[Form, Depends(UpdateMedicalRecord)],
-        session: Annotated[AsyncSession, Depends(db.generate_session)]
+        session: Annotated[AsyncSession, Depends(connector.generate_session)]
 ) -> MedicalRecords:
     for key, value in update_medical_record_data.model_dump().items():
         setattr(medical_record, key, value)
@@ -66,7 +66,7 @@ async def update_medical_record(
 
 async def delete_medical_record(
         medical_record: Annotated[MedicalRecords, Depends(get_medical_record)],
-        session: Annotated[AsyncSession, Depends(db.generate_session)],
+        session: Annotated[AsyncSession, Depends(connector.generate_session)],
         admin: Annotated[User, Depends(get_admin_user)],
 ) -> None:
        await session.delete(medical_record)

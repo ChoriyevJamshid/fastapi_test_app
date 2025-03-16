@@ -2,12 +2,15 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
-from api import router as api_router
-from src.core import create_superuser
+from src.api import router as api_router
+from src.core.create_superuser import create_superuser
 
 @asynccontextmanager
 async def lifespan(main_app: FastAPI):
-    await create_superuser()
+    try:
+        await create_superuser()
+    except Exception as e:
+        pass
     yield
 
 app = FastAPI(

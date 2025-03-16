@@ -7,7 +7,7 @@ from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db import db
+from src.db import connector
 from src.models import User
 from src.api.auth import utils as auth_utils
 from src.models.users import RoleEnum
@@ -17,7 +17,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
 
 async def get_current_user(
-        session: Annotated[AsyncSession, Depends(db.generate_session)],
+        session: Annotated[AsyncSession, Depends(connector.generate_session)],
         token: str = Depends(oauth2_scheme),
 ):
     credentials_exception = HTTPException(
@@ -62,7 +62,7 @@ async def get_admin_user(
 
 
 async def validate_user_login(
-        session: AsyncSession = Depends(db.generate_session),
+        session: AsyncSession = Depends(connector.generate_session),
         username: EmailStr = Form(),
         password: str = Form(),
 ):
@@ -102,7 +102,7 @@ def create_access_token(user: User):
 
 async def create_new_user(
         new_data: Annotated[Form, Depends(UserRegisterSchema)],
-        session: Annotated[AsyncSession, Depends(db.generate_session)],
+        session: Annotated[AsyncSession, Depends(connector.generate_session)],
         admin: Annotated[User, Depends(get_admin_user)],
 ):
 
