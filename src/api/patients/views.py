@@ -20,14 +20,22 @@ async def get_patient(
     return patient
 
 
-@router.post("/", response_model=PatientSchema)
+@router.post(
+    "/",
+    response_model=PatientSchema,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_patient(
         new_patient: Annotated[Patient, Depends(patient_dep.create_patient)]
 ):
     return new_patient
 
 
-@router.put("/{patient_id}", response_model=PatientSchema)
+@router.put(
+    "/{patient_id}",
+    response_model=PatientSchema,
+    status_code=status.HTTP_200_OK
+)
 async def update_patient(
         updated_patient: Annotated[Patient, Depends(patient_dep.update_patient)]
 ):
@@ -41,5 +49,5 @@ async def update_patient(
     dependencies=[Depends(patient_dep.delete_patient)]
 )
 async def delete_patient(
-):
-    pass
+) -> None:
+    return

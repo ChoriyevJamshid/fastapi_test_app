@@ -10,7 +10,7 @@ async def lifespan(main_app: FastAPI):
     try:
         await create_superuser()
     except Exception as e:
-        pass
+        print(e)
     yield
 
 app = FastAPI(
