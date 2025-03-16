@@ -1,11 +1,3 @@
-__all__ = (
-    "auth_views",
-    "users_views",
-    "patients_views",
-    "hospitalization_views",
-    "medical_records_views"
-)
-
 from .auth import views as auth_views
 from .users import views as users_views
 from .patients import views as patients_views

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, ConfigDict
-from core.models import RoleEnum
+from src.core.models import RoleEnum
 
 class Token(BaseModel):
     access_token: str
