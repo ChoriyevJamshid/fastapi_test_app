@@ -174,3 +174,4 @@ cython_debug/
 .pypirc
 *.sqlite3
 postgres_data
+query_tester.py
