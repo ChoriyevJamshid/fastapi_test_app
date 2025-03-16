@@ -13,7 +13,11 @@ from src.api.users.dependencies import update_user, delete_user
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.put("/{user_id}/", response_model=UserSchema)
+@router.put(
+    "/{user_id}/",
+    response_model=UserSchema,
+    status_code=status.HTTP_200_OK,
+)
 async def update_user(
         user: Annotated[User, Depends(update_user)]
 ):

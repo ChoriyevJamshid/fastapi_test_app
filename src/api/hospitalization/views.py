@@ -17,14 +17,22 @@ from src.api.hospitalization.dependencies import (
 router = APIRouter(prefix="/hospitalization", tags=["Hospitalization"])
 
 
-@router.post("/{patient_id}", response_model=HospitalizationSchema)
+@router.post(
+    "/{patient_id}",
+    response_model=HospitalizationSchema,
+    status_code=status.HTTP_201_CREATED
+)
 async def create_patient_hospitalization(
         hospitalization: Annotated[Hospitalization, Depends(create_hospitalization)],
 ):
     return hospitalization
 
 
-@router.patch("/{patient_id}", response_model=HospitalizationSchema)
+@router.patch(
+    "/{patient_id}",
+    response_model=HospitalizationSchema,
+    status_code=status.HTTP_200_OK
+)
 async def update_patient_hospitalization(
         updated_hospitalization: Annotated[Hospitalization, Depends(update_hospitalization)]
 ):
