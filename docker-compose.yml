@@ -21,7 +21,7 @@ services:
         dockerfile: ./Dockerfile
       container_name: fastapi_app
       command: >
-        sh -c "alembic upgrade head && gunicorn -w 4 -k uvicorn.workers.UvicornWorker app:app --bind 0.0.0.0:8001"
+        sh -c "alembic upgrade head && gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.app:app --bind 0.0.0.0:8001"
       ports:
         - 8001:8001
       depends_on:
