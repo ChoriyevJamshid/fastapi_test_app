@@ -1,102 +1,47 @@
 from typing import Annotated
 from fastapi import (
     APIRouter,
+    status,
     Depends,
-    HTTPException,
-    Form,
-    status
 )
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from core import db
-from core.models import Patient, MedicalRecords, User, RoleEnum
-from api.auth import dependencies as auth_dependencies
-from api.medical_records.schemas import (
-    CreateMedicalRecord,
-    UpdateMedicalRecord,
+from src.models import MedicalRecords
+from src.schemas.medical_records import MedicalRecordSchema
+from src.api.medical_records.dependencies import (
+    get_medical_record,
+    create_medical_record,
+    update_medical_record,
+    delete_medical_record
 )
 
 router = APIRouter(prefix="/medical_records", tags=["Medical Records"])
 
 
-@router.get("/{patient_id}")
+@router.get("/{patient_id}", response_model=MedicalRecordSchema)
 async def get_medical_records(
-        patient_id: int,
-        session: AsyncSession = Depends(db.generate_session)
+        medical_record: Annotated[MedicalRecords, Depends(get_medical_record)],
 ):
-    stmt = select(MedicalRecords).where(MedicalRecords.patient_id == patient_id)
-    result = await session.execute(stmt)
-    record = result.scalars().first()
-    if not record:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Medical Record not found")
-    return record
+    return medical_record
 
 
-@router.post("/{patient_id}")
+@router.post("/{patient_id}", response_model=MedicalRecordSchema)
 async def add_medical_records(
-        patient_id: int,
-        new_mr_data: Annotated[Form, Depends(CreateMedicalRecord)],
-        session: AsyncSession = Depends(db.generate_session),
+        created_medical_record: Annotated[MedicalRecords, Depends(create_medical_record)],
 ):
-    # checking patient
-    patient = await session.get(Patient, patient_id)
-    if not patient:
-        raise HTTPException(status_code=404, detail="Patient not found")
-
-    new_mr = MedicalRecords(
-        **new_mr_data.model_dump(),
-        patient_id=patient_id,
-    )
-    session.add(new_mr)
-    await session.commit()
-    return {
-        "message": "Create medical records",
-        "id": new_mr.id
-    }
+    return created_medical_record
 
 
-@router.put("/{patient_id}")
+@router.put("/{patient_id}", response_model=MedicalRecordSchema)
 async def update_medical_records(
-        patient_id: int,
-        update_mr_data: Annotated[Form, Depends(UpdateMedicalRecord)],
-        session: AsyncSession = Depends(db.generate_session),
+        medical_record: Annotated[MedicalRecords, Depends(update_medical_record)],
 ):
-    patient = await session.get(Patient, patient_id)
-    if not patient:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
-    stmt = select(MedicalRecords).where(MedicalRecords.patient_id == patient_id)
-    result = await session.execute(stmt)
-    mr = result.scalars().first()
-    if not mr:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
-    for key, value in update_mr_data.model_dump().items():
-        setattr(mr, key, value)
-    await session.commit()
-    return {
-        "message": "Update medical records",
-    }
+    return medical_record
 
 
-@router.delete("/{patient_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_medical_records(
-        patient_id: int,
-        session: Annotated[AsyncSession, Depends(db.generate_session)],
-        user: Annotated[User, Depends(auth_dependencies.get_current_active_user)]
-):
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-
-    if not user.role == RoleEnum.doctor:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-
-    patient = await session.get(Patient, patient_id)
-    if not patient:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
-    stmt = select(MedicalRecords).where(MedicalRecords.patient_id == patient_id)
-    result = await session.execute(stmt)
-    mr = result.scalars().first()
-    if not mr:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
-    await session.delete(mr)
-    await session.commit()
+@router.delete(
+    "/{patient_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(delete_medical_record)],
+)
+async def delete_medical_records():
+    pass

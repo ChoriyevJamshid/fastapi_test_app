@@ -7,8 +7,11 @@ from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core import db, User
-from api.auth import utils as auth_utils
+from src.db import db
+from src.models import User
+from src.api.auth import utils as auth_utils
+from src.models.users import RoleEnum
+from src.schemas.users import UserRegisterSchema
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
@@ -43,6 +46,17 @@ async def get_current_active_user(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Inactive user"
+        )
+    return user
+
+
+async def get_admin_user(
+        user: Annotated[User, Depends(get_current_active_user)]
+):
+    if not user.role == RoleEnum.admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Forbidden"
         )
     return user
 
@@ -84,3 +98,38 @@ def create_access_token(user: User):
         "email": user.email,
     }
     return auth_utils.encode_jwt(payload=payload)
+
+
+async def create_new_user(
+        new_data: Annotated[Form, Depends(UserRegisterSchema)],
+        session: Annotated[AsyncSession, Depends(db.generate_session)],
+        admin: Annotated[User, Depends(get_admin_user)],
+):
+
+    stmt = (
+        select(User).where(User.email == new_data.email)
+    )
+    result = await session.execute(stmt)
+    user = result.scalar_one_or_none()
+
+    if user is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already registered",
+        )
+
+    if not auth_utils.is_valid_password(new_data.password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password is incorrect"
+        )
+
+    new_user = User(
+        email=new_data.email,
+        role=new_data.role,
+        active=new_data.active,
+        password_hash=auth_utils.hash_password(new_data.password),
+    )
+    session.add(new_user)
+    await session.commit()
+    return new_user

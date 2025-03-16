@@ -1,8 +1,8 @@
-from datetime import timedelta, datetime, timezone
 import re
 import jwt
 import bcrypt
-from core.config import settings
+from datetime import timedelta, datetime, timezone
+from src.core.config import settings
 
 
 def encode_jwt(
@@ -12,7 +12,7 @@ def encode_jwt(
         expire_timedelta: timedelta | None = None,
         expire_minutes: int = settings.access_token_expire_minutes,
 ):
-    print(f"\nON encode: {secret_key = }\n")
+
     to_encode = payload.copy()
     now = datetime.now(timezone.utc)
     if expire_timedelta:
@@ -37,7 +37,6 @@ def decode_jwt(
         secret_key: str = settings.secret_key,
         algorithm: str = settings.algorithm,
 ):
-    print(f"\nON decode: {secret_key = }\n")
     decoded_jwt = jwt.decode(
         jwt=token,
         key=secret_key,
