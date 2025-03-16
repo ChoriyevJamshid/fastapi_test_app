@@ -24,14 +24,22 @@ async def get_medical_records(
     return medical_record
 
 
-@router.post("/{patient_id}", response_model=MedicalRecordSchema)
+@router.post(
+    "/{patient_id}",
+    response_model=MedicalRecordSchema,
+    status_code=status.HTTP_201_CREATED
+)
 async def add_medical_records(
         created_medical_record: Annotated[MedicalRecords, Depends(create_medical_record)],
 ):
     return created_medical_record
 
 
-@router.put("/{patient_id}", response_model=MedicalRecordSchema)
+@router.put(
+    "/{patient_id}",
+    response_model=MedicalRecordSchema,
+    status_code=status.HTTP_200_OK
+)
 async def update_medical_records(
         medical_record: Annotated[MedicalRecords, Depends(update_medical_record)],
 ):

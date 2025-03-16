@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import (
     APIRouter,
     Depends,
+    status
 )
 from src.models import User
 from src.schemas.auth import (
@@ -20,14 +21,22 @@ router = APIRouter(
 )
 
 
-@router.post("/register/", response_model=UserSchema)
+@router.post(
+    "/register/",
+    response_model=UserSchema,
+    status_code=status.HTTP_201_CREATED,
+)
 async def auth_register(
         created_user: Annotated[User, Depends(auth_dependencies.create_new_user)]
 ):
     return created_user
 
 
-@router.post("/login/", response_model=Token)
+@router.post(
+    "/login/",
+    response_model=Token,
+    status_code=status.HTTP_200_OK,
+)
 async def auth_login(
         user: UserLoginSchema = Depends(auth_dependencies.validate_user_login)
 ):
@@ -40,7 +49,11 @@ async def auth_logout():
     pass
 
 
-@router.get("/me/", response_model=UserSchema)
+@router.get(
+    "/me/",
+    response_model=UserSchema,
+    status_code=status.HTTP_200_OK,
+)
 async def auth_me(
         user: Annotated[User, Depends(auth_dependencies.get_current_active_user)]
 ) -> User:
