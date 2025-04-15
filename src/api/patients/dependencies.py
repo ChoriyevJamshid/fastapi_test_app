@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status, Form
+from fastapi import Depends, HTTPException, status, Form, Query
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db import connector
@@ -22,6 +23,18 @@ async def get_patient_by_id(
     if not patient:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Patient not found")
     return patient
+
+
+async def get_patients(
+        session: Annotated[AsyncSession, Depends(connector.generate_session)],
+        page: Annotated[int, Query()] = 1,
+        count: Annotated[int, Query(ge=20, le=100)] = 20,
+) -> list:
+    offset = (page - 1) * count
+    stmt = select(Patient).offset(offset).limit(count)
+    result = await session.execute(stmt)
+    patients = result.scalars().all()
+    return list(patients)
 
 
 async def create_patient(

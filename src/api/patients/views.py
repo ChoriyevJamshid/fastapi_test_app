@@ -4,7 +4,11 @@ from fastapi import (
     Depends,
     status,
 )
+from fastapi.params import Query
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.db import connector
 from src.models import Patient
 from src.schemas.patients import PatientSchema
 from src.api.patients import dependencies as patient_dep
@@ -51,3 +55,16 @@ async def update_patient(
 async def delete_patient(
 ) -> None:
     return
+
+
+
+@router.get(
+    "/",
+    status_code=status.HTTP_200_OK,
+    response_model=list[PatientSchema]
+)
+async def index(
+        patients: Annotated[list, Depends(patient_dep.get_patients)],
+):
+    return patients
+
